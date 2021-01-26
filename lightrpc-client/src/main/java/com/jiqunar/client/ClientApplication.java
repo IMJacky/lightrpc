@@ -1,6 +1,5 @@
 package com.jiqunar.client;
 
-import com.jiqunar.common.HelloService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -14,7 +13,5 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ClientApplication {
     public static void main(String[] args) {
         SpringApplication.run(ClientApplication.class, args);
-        HelloService helloService = ProxyFactory.create(HelloService.class);
-        System.out.println(helloService.hello("王杰光"));
     }
 }

@@ -40,21 +40,27 @@ public class RpcServer implements InitializingBean {
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
                         // 添加编码器
-                        pipeline.addLast(new RpcEncoder(RpcRequest.class, new FastJsonSerializer()));
+                        pipeline.addLast(new RpcEncoder(RpcResponse.class, new FastJsonSerializer()));
                         // 添加解码器
-                        pipeline.addLast(new RpcDecoder(RpcResponse.class, new FastJsonSerializer()));
+                        pipeline.addLast(new RpcDecoder(RpcRequest.class, new FastJsonSerializer()));
                         // 请求处理类
                         pipeline.addLast(serverHandler);
                     }
                 });
-        ChannelFuture future = serverBootstrap.bind(6666).sync();
-        System.out.println("NettyServer启动成功");
-        future.channel().closeFuture().sync();
+        ChannelFuture channelFuture = serverBootstrap.bind(6666).sync();
+        channelFuture.addListener(future -> {
+            if (future.isSuccess()) {
+                System.out.println("NettyServer启动成功");
+            } else {
+                System.err.println("NettyServer启动失败");
+            }
+        });
     }
 
     @PreDestroy
-    public void close() {
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+    public void close() throws InterruptedException {
+        bossGroup.shutdownGracefully().sync();
+        workerGroup.shutdownGracefully().sync();
+        System.out.println("NettyServer关闭");
     }
 }

@@ -28,7 +28,7 @@ public class RpcClient {
         this.port = port;
     }
 
-    public void connect() {
+    public void connect() throws InterruptedException {
         clientHandler = new ClientHandler();
         eventLoopGroup = new NioEventLoopGroup(1);
         Bootstrap bootstrap = new Bootstrap();
@@ -49,12 +49,13 @@ public class RpcClient {
                         pipeline.addLast(clientHandler);
                     }
                 });
-        ChannelFuture channelFuture = bootstrap.connect(host, port);
+        // sync同步连接服务端
+        ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
         channelFuture.addListener(future -> {
             if (future.isSuccess()) {
-                System.out.println("连接成功!");
+                System.out.println("NettyClient连接成功");
             } else {
-                System.err.println("连接失败!");
+                System.err.println("NettyClient连接失败");
             }
         });
         channel = channelFuture.channel();
@@ -70,8 +71,9 @@ public class RpcClient {
     }
 
     @PreDestroy
-    public void close() {
-        eventLoopGroup.shutdownGracefully();
-        channel.closeFuture().syncUninterruptibly();
+    public void close() throws InterruptedException {
+        eventLoopGroup.shutdownGracefully().sync();
+        channel.closeFuture().syncUninterruptibly().sync();
+        System.out.println("NettyServer关闭");
     }
 }

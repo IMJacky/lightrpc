@@ -5,6 +5,7 @@ import com.jiqunar.common.RpcResponse;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.UUID;
 
 /**
@@ -31,5 +32,13 @@ public class ClientDynamicProxy<T> implements InvocationHandler {
         rpcClient.connect();
         RpcResponse rpcResponse = rpcClient.send(rpcRequest);
         return rpcResponse.getResult();
+    }
+
+    public T getProxy() {
+        return (T) Proxy.newProxyInstance(
+                clazz.getClassLoader(),
+                new Class<?>[]{clazz},
+                this
+        );
     }
 }
